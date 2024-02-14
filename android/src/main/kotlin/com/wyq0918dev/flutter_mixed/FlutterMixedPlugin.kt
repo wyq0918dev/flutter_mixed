@@ -1,58 +1,144 @@
 package com.wyq0918dev.flutter_mixed
 
+import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
-import android.view.LayoutInflater
+import android.util.Log
 import android.view.View
-import android.view.ViewGroup
+import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.FragmentContainerView
+import io.flutter.embedding.android.FlutterEngineConfigurator
 import io.flutter.embedding.android.FlutterFragment
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterEngineCache
+import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
-class FlutterMixedPlugin : FlutterFragment(), FlutterPlugin, MethodCallHandler {
+open class FlutterMixedPlugin : FragmentActivity(), FlutterPlugin, MethodCallHandler,
+    FlutterEngineConfigurator {
 
-    private lateinit var channel: MethodChannel
+    private lateinit var mFlutterFragment: FlutterFragment
+    private lateinit var mMethodChannel: MethodChannel
+    private lateinit var mFragmentContainerView: FragmentContainerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+        val flutterEngine = FlutterEngine(this@FlutterMixedPlugin)
+
+        flutterEngine.dartExecutor.executeDartEntrypoint(DartExecutor.DartEntrypoint.createDefault())
+
+        FlutterEngineCache.getInstance().put(engineId, flutterEngine)
+
+        mFlutterFragment = FlutterFragment.withCachedEngine(engineId).build()
+        mFragmentContainerView = FragmentContainerView(this@FlutterMixedPlugin)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return super.onCreateView(inflater, container, savedInstanceState)
+    override fun onPostResume() {
+        super.onPostResume()
+        try {
+            mFlutterFragment.onPostResume()
+        } catch (e: Exception) {
+            Log.e(tag, "onPostResume", e)
+        }
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    @SuppressLint("MissingSuperCall")
+    override fun onNewIntent(intent: Intent) {
+        try {
+            mFlutterFragment.onNewIntent(intent)
+        } catch (e: Exception) {
+            Log.e(tag, "onNewIntent", e)
+        }
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
+
+    @Deprecated("Deprecated in Java")
+    @SuppressLint("MissingSuperCall")
+    override fun onBackPressed() {
+        try {
+            mFlutterFragment.onBackPressed()
+        } catch (e: Exception) {
+            Log.e(tag, "onBackPressed", e)
+        }
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        try {
+            mFlutterFragment.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        } catch (e: Exception) {
+            Log.e(tag, "onRequestPermissionsResult", e)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        try {
+            mFlutterFragment.onActivityResult(requestCode, resultCode, data)
+        } catch (e: Exception) {
+            Log.e(tag, "onActivityResult", e)
+        }
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onUserLeaveHint() {
+        try {
+            mFlutterFragment.onUserLeaveHint()
+        } catch (e: Exception) {
+            Log.e(tag, "onUserLeaveHint", e)
+        }
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        try {
+            mFlutterFragment.onTrimMemory(level)
+        } catch (e: Exception) {
+            Log.e(tag, "onTrimMemory", e)
+        }
+    }
+
+    open val flutter: View?
+        get() = mFragmentContainerView
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+
+    }
+
+    override fun cleanUpFlutterEngine(flutterEngine: FlutterEngine) {
+
     }
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_mixed")
-        channel.setMethodCallHandler(this)
+        mMethodChannel = MethodChannel(flutterPluginBinding.binaryMessenger, channelName)
+        mMethodChannel.setMethodCallHandler(this)
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
-        if (call.method == "getPlatformVersion") {
-            result.success("Android ${android.os.Build.VERSION.RELEASE}")
-        } else {
-            result.notImplemented()
+        when (call.method) {
+            "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            else -> result.notImplemented()
         }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        channel.setMethodCallHandler(null)
+        mMethodChannel.setMethodCallHandler(null)
+    }
+
+    companion object {
+        const val channelName: String = "flutter_mixed"
+        const val engineId: String = "my_engine_id"
+        const val tag: String = "FlutterMixedPlugin"
     }
 }
