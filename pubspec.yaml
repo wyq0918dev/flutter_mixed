@@ -19,4 +19,4 @@ flutter:
     platforms:
       android:
         package: com.wyq0918dev.flutter_mixed
-        pluginClass: FlutterMixedPlugin
+        pluginClass: MixedActivity
