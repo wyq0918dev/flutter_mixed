@@ -1,5 +1,5 @@
 name: flutter_mixed
-description: "FlutterMixed is a Flutter plugin that can quickly mix Flutter into existing Android applications in the form of Fragment."
+description: "FlutterMixed is a Flutter plugin that can quickly mix FlutterFragment into existing Android applications in the form of View."
 version: 0.0.1
 homepage: https://github.com/wyq0918dev/flutter_mixed
 repository: https://github.com/wyq0918dev/flutter_mixed

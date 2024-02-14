@@ -1,6 +1,6 @@
 # flutter_mixed
 
-FlutterMixed is a Flutter plugin that can quickly mix Flutter into existing Android applications in the form of Fragment.
+FlutterMixed is a Flutter plugin that can quickly mix FlutterFragment into existing Android applications in the form of View.
 
 ## Getting Started
 
