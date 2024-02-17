@@ -23,12 +23,11 @@ import io.flutter.plugin.common.MethodChannel.Result
 open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
     FlutterEngineConfigurator {
 
-    private var mFlutterFragment: FlutterFragment? = null
+    private lateinit var mFlutterFragment: FlutterFragment
     private lateinit var mMethodChannel: MethodChannel
-    private lateinit var mFragmentContainerView: FragmentContainerView
 
     /** 获取显示 FlutterFragment 的容器控件 */
-    open val flutter: View? get() = mFragmentContainerView
+    open val flutter: FlutterFragment get() = mFlutterFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val flutterEngine = FlutterEngine(this@MixedActivity)
@@ -37,43 +36,15 @@ open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
         )
         FlutterEngineCache.getInstance().put(engineId, flutterEngine)
         super.onCreate(savedInstanceState)
-        mFlutterFragment = supportFragmentManager.findFragmentByTag(
-            tagFlutterFragment
-        ) as FlutterFragment?
-        mFragmentContainerView = FragmentContainerView(
-            context = this@MixedActivity
-        ).apply {
-            id = R.id.flutter_container
-        }
-        val flutterFragment = FlutterFragment.withCachedEngine(engineId)
+        mFlutterFragment = FlutterFragment.withCachedEngine(engineId)
             .destroyEngineWithFragment(false)
             .shouldAttachEngineToActivity(true)
-            .build<FlutterFragment>()
-        if (mFlutterFragment == null) {
-            if (!flutterFragment.isAdded && supportFragmentManager.findFragmentByTag(
-                    tagFlutterFragment
-                ) == null
-            ) {
-                supportFragmentManager.commit(
-                    allowStateLoss = false,
-                    body = {
-                        mFlutterFragment = flutterFragment
-                        add(
-                            mFragmentContainerView.id, flutterFragment, tagFlutterFragment
-                        )
-                    }
-                )
-            }
-        }
+            .build()
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
 
-        Toast.makeText(
-            this@MixedActivity, flutterEngine.plugins.has(
-                this@MixedActivity.javaClass
-            ).toString(), Toast.LENGTH_SHORT
-        ).show()
+
 
     }
 
@@ -100,7 +71,7 @@ open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
     override fun onPostResume() {
         super.onPostResume()
         try {
-            mFlutterFragment?.onPostResume()
+            mFlutterFragment.onPostResume()
         } catch (e: Exception) {
             Log.e(tag, "onPostResume", e)
         }
@@ -109,7 +80,7 @@ open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
     @SuppressLint("MissingSuperCall")
     override fun onNewIntent(intent: Intent) {
         try {
-            mFlutterFragment?.onNewIntent(intent)
+            mFlutterFragment.onNewIntent(intent)
         } catch (e: Exception) {
             Log.e(tag, "onNewIntent", e)
         }
@@ -119,7 +90,7 @@ open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         try {
-            mFlutterFragment?.onBackPressed()
+            mFlutterFragment.onBackPressed()
         } catch (e: Exception) {
             Log.e(tag, "onBackPressed", e)
         }
@@ -132,7 +103,7 @@ open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         try {
-            mFlutterFragment?.onRequestPermissionsResult(requestCode, permissions, grantResults)
+            mFlutterFragment.onRequestPermissionsResult(requestCode, permissions, grantResults)
         } catch (e: Exception) {
             Log.e(tag, "onRequestPermissionsResult", e)
         }
@@ -141,7 +112,7 @@ open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         try {
-            mFlutterFragment?.onActivityResult(requestCode, resultCode, data)
+            mFlutterFragment.onActivityResult(requestCode, resultCode, data)
         } catch (e: Exception) {
             Log.e(tag, "onActivityResult", e)
         }
@@ -150,7 +121,7 @@ open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
     @SuppressLint("MissingSuperCall")
     override fun onUserLeaveHint() {
         try {
-            mFlutterFragment?.onUserLeaveHint()
+            mFlutterFragment.onUserLeaveHint()
         } catch (e: Exception) {
             Log.e(tag, "onUserLeaveHint", e)
         }
@@ -160,7 +131,7 @@ open class MixedActivity : FragmentActivity(), FlutterPlugin, MethodCallHandler,
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
         try {
-            mFlutterFragment?.onTrimMemory(level)
+            mFlutterFragment.onTrimMemory(level)
         } catch (e: Exception) {
             Log.e(tag, "onTrimMemory", e)
         }
