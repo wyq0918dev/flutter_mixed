@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import io.flutter.embedding.android.FlutterFragment
+import io.flutter.embedding.android.FlutterView
 import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.android.TransparencyMode
 import io.flutter.embedding.engine.FlutterEngine
@@ -44,6 +45,7 @@ internal class FlutterMixedFragment private constructor() : FlutterFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val flutterView: FlutterView? = FlutterMixedUtils.findFlutterView(view = view)
     }
 
     override fun onDestroyView() {
