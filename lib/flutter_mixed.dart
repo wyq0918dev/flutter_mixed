@@ -1,7 +1,11 @@
-import 'flutter_mixed_platform_interface.dart';
+import 'src/flutter_mixed_platform_interface.dart';
 
 class FlutterMixed {
-  Future<String?> getPlatformVersion() {
+  const FlutterMixed._();
+
+  static void registerWith() {}
+
+  static Future<String?> getPlatformVersion() {
     return FlutterMixedPlatform.instance.getPlatformVersion();
   }
 }
