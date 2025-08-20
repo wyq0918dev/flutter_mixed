@@ -15,7 +15,6 @@ import com.wyq0918dev.flutter_mixed.FlutterMixed
 import com.wyq0918dev.flutter_mixed.MixedAware
 import com.wyq0918dev.flutter_mixed.MixedSignals
 
-
 class MainActivity : AppCompatActivity(), MixedAware {
 
     private var mMixedSignals: MixedSignals? = null
