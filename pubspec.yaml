@@ -26,14 +26,15 @@ flutter:
       android:
         package: com.wyq0918dev.flutter_mixed
         pluginClass: FlutterMixedPlugin
+        dartPluginClass: FlutterMixed
       ios:
-        pluginClass: FlutterMixedPlugin
+        dartPluginClass: FlutterMixed
       linux:
-        pluginClass: FlutterMixedPlugin
+        dartPluginClass: FlutterMixed
       macos:
-        pluginClass: FlutterMixedPlugin
+        dartPluginClass: FlutterMixed
       windows:
-        pluginClass: FlutterMixedPluginCApi
+        dartPluginClass: FlutterMixed
       web:
         pluginClass: FlutterMixedWeb
         fileName: flutter_mixed_web.dart
