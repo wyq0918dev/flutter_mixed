@@ -1,12 +1,9 @@
 package com.wyq0918dev.flutter_mixed
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import androidx.core.view.setPadding
 import io.flutter.embedding.android.FlutterFragment
 import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.android.TransparencyMode
@@ -29,18 +26,20 @@ internal class FlutterMixedFragment private constructor() : FlutterFragment() {
             savedInstanceState,
         )
 
-        return FrameLayout(context).apply {
-            setBackgroundColor(Color.BLUE)
-            addView(
-                flutter,
-                FrameLayout.LayoutParams(
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                    FrameLayout.LayoutParams.MATCH_PARENT,
-                ).apply {
-                    setPadding(20)
-                },
-            )
-        }
+        return flutter
+
+//        return FrameLayout(context).apply {
+//            setBackgroundColor(Color.BLUE)
+//            addView(
+//                flutter,
+//                FrameLayout.LayoutParams(
+//                    FrameLayout.LayoutParams.MATCH_PARENT,
+//                    FrameLayout.LayoutParams.MATCH_PARENT,
+//                ).apply {
+//                    setPadding(20)
+//                },
+//            )
+//        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -62,9 +61,9 @@ internal class FlutterMixedFragment private constructor() : FlutterFragment() {
 
     internal companion object {
 
-        internal fun buildMixed(): FlutterMixedFragment {
+        internal fun buildMixed(): FlutterFragment {
             try {
-                val mFragment: Class<FlutterMixedFragment> = FlutterMixedFragment::class.java
+                val mFragment: Class<out FlutterFragment> = FlutterMixedFragment::class.java
                 val args = Bundle().apply {
                     putString(ARG_CACHED_ENGINE_ID, FlutterMixed.ENGINE_ID)
                     putBoolean(ARG_DESTROY_ENGINE_WITH_FRAGMENT, false)

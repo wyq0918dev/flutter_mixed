@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_mixed/flutter_mixed.dart';
+import 'package:freefeos/freefeos.dart';
 
 void main() {
   runApp(const MyApp());
@@ -43,7 +44,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       builder: FreeFEOS.builder,
       home: Scaffold(
-        appBar: AppBar(title: const Text('Plugin example app')),
+        appBar: AppBar(title: const Text('Mixed'), centerTitle: true),
         body: Center(child: Text('Running on: $_platformVersion\n')),
       ),
     );
