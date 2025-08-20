@@ -18,14 +18,16 @@ class MainActivity : AppCompatActivity(), MixedAware {
         // 启用边倒边
         enableEdgeToEdge()
         // 承载Flutter的控件
-        setContentView(FlutterMixed.getFlutter(activity = this))
+        setContentView(FlutterMixed.getFlutter(activity = this@MainActivity))
     }
 
-    override fun onAttachedSignals(signals: MixedSignals) {
+    // 附加信号
+    override fun onAttachSignals(signals: MixedSignals) {
         mMixedSignals = signals
     }
 
-    override fun onDetachedSignals() {
+    // 销毁信号
+    override fun onDetachSignals() {
         mMixedSignals = null
     }
 
@@ -50,24 +52,12 @@ class MainActivity : AppCompatActivity(), MixedAware {
         grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        mMixedSignals?.onRequestPermissionsResult(
-            requestCode,
-            permissions,
-            grantResults
-        )
+        mMixedSignals?.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
-    override fun onActivityResult(
-        requestCode: Int,
-        resultCode: Int,
-        data: Intent?
-    ) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        mMixedSignals?.onActivityResult(
-            requestCode,
-            resultCode,
-            data
-        )
+        mMixedSignals?.onActivityResult(requestCode, resultCode, data)
     }
 
     override fun onUserLeaveHint() {

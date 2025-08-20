@@ -43,7 +43,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       builder: [FreeFEOS.builder, FlutterMixed.builder].toBuilder,
       home: Scaffold(
-        appBar: AppBar(title: const Text('Mixed'), centerTitle: true),
+        appBar: AppBar(title: const Text('FlutterMixed example')),
         body: Center(child: Text('Running on: $_platformVersion\n')),
       ),
     );

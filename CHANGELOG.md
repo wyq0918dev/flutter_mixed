@@ -1,3 +1,7 @@
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Preliminary realization of functions.
+
+## 0.0.1
+
+* publish test

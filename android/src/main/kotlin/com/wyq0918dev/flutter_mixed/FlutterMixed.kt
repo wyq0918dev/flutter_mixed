@@ -15,6 +15,7 @@ class FlutterMixed private constructor() {
 
 
     companion object {
+        private val mixed: FlutterMixed = FlutterMixed()
 
         internal const val ENGINE_ID: String = "flutter_mixed_engine"
 
@@ -33,12 +34,12 @@ class FlutterMixed private constructor() {
                 activity.lifecycle.addObserver(object : DefaultLifecycleObserver{
                     override fun onCreate(owner: LifecycleOwner) {
                         super.onCreate(owner)
-                        activity.onAttachedSignals(adapterAll)
+                        activity.onAttachSignals(adapterAll)
                     }
 
                     override fun onDestroy(owner: LifecycleOwner) {
                         super.onDestroy(owner)
-                        activity.onDetachedSignals()
+                        activity.onDetachSignals()
                     }
                 })
             } else {
