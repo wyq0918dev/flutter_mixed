@@ -8,7 +8,7 @@
     </queries>
 
     <application
-        android:name="${applicationName}"
+        android:name=".MainApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="flutter_mixed_example"
         android:theme="@style/FlutterMixedTheme">
