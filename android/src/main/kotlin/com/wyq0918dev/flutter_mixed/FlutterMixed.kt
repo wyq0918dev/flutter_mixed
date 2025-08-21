@@ -20,17 +20,19 @@ class FlutterMixed private constructor() {
         internal const val ENGINE_ID: String = "flutter_mixed_engine"
 
         fun initFlutter(application: Application) {
-            FlutterEngine(application).let { engine ->
-                val entry = DartExecutor.DartEntrypoint.createDefault()
-                engine.dartExecutor.executeDartEntrypoint(entry)
-                FlutterEngineCache.getInstance().put(ENGINE_ID, engine)
+            if (FlutterEngineCache.getInstance().get(ENGINE_ID) == null) {
+                FlutterEngine(application).let { engine ->
+                    val entry = DartExecutor.DartEntrypoint.createDefault()
+                    engine.dartExecutor.executeDartEntrypoint(entry)
+                    FlutterEngineCache.getInstance().put(ENGINE_ID, engine)
+                }
             }
         }
 
         fun loadFlutter(activity: FragmentActivity, aware: MixedAware): View {
             val adapterAll = FlutterMixedAdapter(fragmentActivity = activity)
 
-            activity.lifecycle.addObserver(object : DefaultLifecycleObserver{
+            activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
                 override fun onCreate(owner: LifecycleOwner) {
                     super.onCreate(owner)
                     aware.onAttachSignals(adapterAll)

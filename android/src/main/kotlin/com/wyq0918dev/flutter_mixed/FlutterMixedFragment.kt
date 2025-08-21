@@ -9,6 +9,7 @@ import io.flutter.embedding.android.FlutterView
 import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.android.TransparencyMode
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.embedding.engine.FlutterEngineCache
 
 internal class FlutterMixedFragment private constructor() : FlutterFragment() {
 
@@ -65,17 +66,21 @@ internal class FlutterMixedFragment private constructor() : FlutterFragment() {
 
         internal fun buildMixed(): FlutterFragment {
             try {
-                val mFragment: Class<out FlutterFragment> = FlutterMixedFragment::class.java
-                val args = Bundle().apply {
-                    putString(ARG_CACHED_ENGINE_ID, FlutterMixed.ENGINE_ID)
-                    putBoolean(ARG_DESTROY_ENGINE_WITH_FRAGMENT, false)
-                    putString(ARG_FLUTTERVIEW_RENDER_MODE, RenderMode.surface.name)
-                    putString(ARG_FLUTTERVIEW_TRANSPARENCY_MODE, TransparencyMode.opaque.name)
-                    putBoolean(ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY, true)
+                if (FlutterEngineCache.getInstance().get(FlutterMixed.ENGINE_ID) != null) {
+                    val mFragment: Class<out FlutterFragment> = FlutterMixedFragment::class.java
+                    val args = Bundle().apply {
+                        putString(ARG_CACHED_ENGINE_ID, FlutterMixed.ENGINE_ID)
+                        putBoolean(ARG_DESTROY_ENGINE_WITH_FRAGMENT, false)
+                        putString(ARG_FLUTTERVIEW_RENDER_MODE, RenderMode.surface.name)
+                        putString(ARG_FLUTTERVIEW_TRANSPARENCY_MODE, TransparencyMode.opaque.name)
+                        putBoolean(ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY, true)
+                    }
+                    val mixed = mFragment.getDeclaredConstructor().newInstance()
+                    mixed.setArguments(args)
+                    return mixed
+                } else {
+                    error(message = "未初始化Flutter")
                 }
-                val mixed = mFragment.getDeclaredConstructor().newInstance()
-                mixed.setArguments(args)
-                return mixed
             } catch (e: Exception) {
                 error(message = e.toString())
             }
