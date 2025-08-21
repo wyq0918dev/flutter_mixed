@@ -27,24 +27,20 @@ class FlutterMixed private constructor() {
             }
         }
 
-        fun getFlutter(activity: FragmentActivity): View {
+        fun loadFlutter(activity: FragmentActivity, aware: MixedAware): View {
             val adapterAll = FlutterMixedAdapter(fragmentActivity = activity)
 
-            if (activity is MixedAware) {
-                activity.lifecycle.addObserver(object : DefaultLifecycleObserver{
-                    override fun onCreate(owner: LifecycleOwner) {
-                        super.onCreate(owner)
-                        activity.onAttachSignals(adapterAll)
-                    }
+            activity.lifecycle.addObserver(object : DefaultLifecycleObserver{
+                override fun onCreate(owner: LifecycleOwner) {
+                    super.onCreate(owner)
+                    aware.onAttachSignals(adapterAll)
+                }
 
-                    override fun onDestroy(owner: LifecycleOwner) {
-                        super.onDestroy(owner)
-                        activity.onDetachSignals()
-                    }
-                })
-            } else {
-                error(message = "宿主Activity未实现MixedAware接口")
-            }
+                override fun onDestroy(owner: LifecycleOwner) {
+                    super.onDestroy(owner)
+                    aware.onDetachSignals()
+                }
+            })
 
             return ViewPager2(activity).apply {
                 isUserInputEnabled = false

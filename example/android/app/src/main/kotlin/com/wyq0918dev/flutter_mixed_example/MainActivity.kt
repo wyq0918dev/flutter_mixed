@@ -24,7 +24,10 @@ class MainActivity : AppCompatActivity(), MixedAware {
         // 启用边倒边
         enableEdgeToEdge()
         // 承载Flutter的控件
-        val flutter: View = FlutterMixed.getFlutter(activity = this@MainActivity)
+        val flutter: View = FlutterMixed.loadFlutter(
+            activity = this@MainActivity,
+            aware = this@MainActivity,
+        )
         // 设置布局
         setContentView(R.layout.activity_main)
         // 设置安全区填充
