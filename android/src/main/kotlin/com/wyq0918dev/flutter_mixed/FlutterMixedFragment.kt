@@ -28,6 +28,8 @@ internal class FlutterMixedFragment private constructor() : FlutterFragment() {
             savedInstanceState,
         )
 
+//        val flutterView: FlutterView? = FlutterMixedUtils.findFlutterView(view = flutter)
+
         return flutter
 
 //        return FrameLayout(context).apply {
