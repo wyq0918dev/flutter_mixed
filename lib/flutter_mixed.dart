@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import 'src/flutter_mixed_platform_interface.dart';
+import 'src/platform_interface.dart';
 
 class FlutterMixed {
   const FlutterMixed._();

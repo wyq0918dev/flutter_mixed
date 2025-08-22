@@ -18,7 +18,9 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         findViewById<FrameLayout>(R.id.main).let { container ->
-            FlutterMixedPlugin.loadFlutter(this@MainActivity) { fragment, view ->
+            FlutterMixedPlugin.loadFlutter(
+                activity = this@MainActivity,
+            ) { fragment, view ->
                 mFlutterFragment = fragment
                 container.addView(view)
             }

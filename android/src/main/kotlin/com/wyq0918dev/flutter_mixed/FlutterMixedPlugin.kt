@@ -79,7 +79,7 @@ class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun initFlutter(application: Application) {
-        if (checkEngineInitialize()) {
+        if (!checkEngineInitialize()) {
             initializeEngine(application = application)
         }
     }
@@ -118,7 +118,7 @@ class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
      * @return true 未初始化 false 已初始化
      */
     private fun checkEngineInitialize(): Boolean {
-        return FlutterEngineCache.getInstance().get(ENGINE_ID) == null
+        return FlutterEngineCache.getInstance().get(ENGINE_ID) != null
     }
 
 
@@ -136,8 +136,6 @@ class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         return null
     }
 
-
-
     private fun findFlutterView(view: View?): FlutterView? {
         when (view) {
             is FlutterView -> return view
@@ -154,27 +152,25 @@ class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         if (checkEngineInitialize()) {
             return FlutterFragment.withCachedEngine(ENGINE_ID).build()
         } else {
-            error("")
+            error("未初始化")
         }
     }
 
 
     companion object : Export {
-        private val plugin: FlutterMixedPlugin = FlutterMixedPlugin()
-
-        /** 引擎ID */
+        private val PLUGIN: FlutterMixedPlugin = FlutterMixedPlugin()
         private const val ENGINE_ID: String = "flutter_mixed_engine"
 
         override fun initFlutter(
             application: Application,
-        ) = plugin.initFlutter(
+        ) = PLUGIN.initFlutter(
             application = application,
         )
 
         override fun loadFlutter(
             activity: FragmentActivity,
             block: (FlutterFragment, View) -> Unit,
-        ) = plugin.loadFlutter(
+        ) = PLUGIN.loadFlutter(
             activity = activity,
             block = block,
         )
