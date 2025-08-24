@@ -6,6 +6,8 @@ import android.view.ViewGroup
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import io.flutter.embedding.android.FlutterFragment
@@ -18,17 +20,21 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 
-class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
+    /** 方法通道 */
     private lateinit var mChannel: MethodChannel
+
+    /** Flutter片段 */
     private lateinit var mFlutterFragment: FlutterFragment
+
+    /** HostActivity */
     private lateinit var mHostActivity: FragmentActivity
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        mChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "flutter_mixed")
+        mChannel = MethodChannel(flutterPluginBinding.binaryMessenger, CHANNEL_NAME)
         mChannel.setMethodCallHandler(this)
     }
 
@@ -61,12 +67,54 @@ class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     }
 
-    private interface Export {
+    private interface IExport {
         fun initFlutter(application: Application)
         fun loadFlutter(
             activity: FragmentActivity,
             block: (FlutterFragment, View) -> Unit,
         )
+    }
+
+    private val mExport: IExport = object : IExport {
+        override fun initFlutter(application: Application) {
+            if (!checkEngineInitialize()) {
+                initializeEngine(application = application)
+            }
+        }
+
+        override fun loadFlutter(
+            activity: FragmentActivity, block: (FlutterFragment, View) -> Unit
+        ) {
+            mHostActivity = activity
+            mFlutterFragment = buildFlutter()
+
+
+
+
+            block.invoke(mFlutterFragment, mFlutterContainer)
+        }
+    }
+
+    private val mObserver: DefaultLifecycleObserver = object : DefaultLifecycleObserver {
+        override fun onCreate(owner: LifecycleOwner) {
+            super.onCreate(owner = owner)
+        }
+
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner = owner)
+        }
+
+        override fun onResume(owner: LifecycleOwner) {
+            super.onResume(owner = owner)
+        }
+
+        override fun onPause(owner: LifecycleOwner) {
+            super.onPause(owner = owner)
+        }
+
+        override fun onDestroy(owner: LifecycleOwner) {
+            super.onDestroy(owner = owner)
+        }
     }
 
 
@@ -78,11 +126,6 @@ class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun initFlutter(application: Application) {
-        if (!checkEngineInitialize()) {
-            initializeEngine(application = application)
-        }
-    }
 
     private val mFlutterAdapter: FragmentStateAdapter by lazy {
         return@lazy object : FragmentStateAdapter(mHostActivity) {
@@ -97,20 +140,6 @@ class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             adapter = mFlutterAdapter
         }
     }
-
-    private fun loadFlutter(
-        activity: FragmentActivity,
-        block: (FlutterFragment, View) -> Unit,
-    ) {
-        mHostActivity = activity
-        mFlutterFragment = buildFlutter()
-
-
-
-
-        block.invoke(mFlutterFragment, mFlutterContainer)
-    }
-
 
     /**
      * 检查引擎是否已初始化
@@ -152,27 +181,12 @@ class FlutterMixedPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         if (checkEngineInitialize()) {
             return FlutterFragment.withCachedEngine(ENGINE_ID).build()
         } else {
-            error("未初始化")
+            error(message = "未初始化")
         }
     }
 
-
-    companion object : Export {
-        private val PLUGIN: FlutterMixedPlugin = FlutterMixedPlugin()
+    companion object : IExport by FlutterMixedPlugin().mExport {
         private const val ENGINE_ID: String = "flutter_mixed_engine"
-
-        override fun initFlutter(
-            application: Application,
-        ) = PLUGIN.initFlutter(
-            application = application,
-        )
-
-        override fun loadFlutter(
-            activity: FragmentActivity,
-            block: (FlutterFragment, View) -> Unit,
-        ) = PLUGIN.loadFlutter(
-            activity = activity,
-            block = block,
-        )
+        private const val CHANNEL_NAME: String = "flutter_mixed"
     }
 }
