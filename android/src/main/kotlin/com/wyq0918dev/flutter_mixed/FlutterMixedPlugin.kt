@@ -144,7 +144,7 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
     /**
      * 检查引擎是否已初始化
      *
-     * @return true 未初始化 false 已初始化
+     * @return true 已初始化 false 未初始化
      */
     private fun checkEngineInitialize(): Boolean {
         return FlutterEngineCache.getInstance().get(ENGINE_ID) != null
@@ -185,8 +185,13 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
         }
     }
 
+    /** 伴生对象 */
     companion object : IExport by FlutterMixedPlugin().mExport {
+
+        /** 引擎ID */
         private const val ENGINE_ID: String = "flutter_mixed_engine"
+
+        /** 通道名称 */
         private const val CHANNEL_NAME: String = "flutter_mixed"
     }
 }
