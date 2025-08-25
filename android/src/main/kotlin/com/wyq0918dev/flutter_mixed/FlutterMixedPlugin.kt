@@ -1,12 +1,14 @@
 package com.wyq0918dev.flutter_mixed
 
 import android.app.Application
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
@@ -18,9 +20,11 @@ import io.flutter.embedding.engine.dart.DartExecutor
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.embedding.engine.plugins.lifecycle.FlutterLifecycleAdapter
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.Result
+
 
 class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, ActivityAware {
 
@@ -32,6 +36,7 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
 
     /** HostActivity */
     private lateinit var mHostActivity: FragmentActivity
+    private lateinit var mLifecycle: Lifecycle
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         mChannel = MethodChannel(flutterPluginBinding.binaryMessenger, CHANNEL_NAME)
@@ -39,10 +44,11 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
     }
 
     override fun onMethodCall(
-        call: MethodCall, result: Result
+        call: MethodCall,
+        result: Result,
     ) {
         when (call.method) {
-            "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
+            "getPlatformVersion" -> result.success("Android ${Build.VERSION.RELEASE}")
             else -> result.notImplemented()
         }
     }
@@ -52,7 +58,8 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-
+        mLifecycle = FlutterLifecycleAdapter.getActivityLifecycle(binding)
+        mLifecycle.addObserver(mObserver)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -64,33 +71,58 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
     }
 
     override fun onDetachedFromActivity() {
-
+        mLifecycle.removeObserver(mObserver)
     }
 
+    /**
+     * 导出的接口
+     */
     private interface IExport {
+
+        /**
+         * 初始化Flutter引擎
+         *
+         * @param application 应用程序上下文
+         */
         fun initFlutter(application: Application)
+
+        /**
+         * 加载Flutter视图
+         *
+         * @param activity 活动上下文
+         * @param block 加载完成回调
+         */
         fun loadFlutter(
             activity: FragmentActivity,
             block: (FlutterFragment, View) -> Unit,
         )
     }
 
+    /** 导出接口实现 */
     private val mExport: IExport = object : IExport {
+
+        /**
+         * 初始化Flutter引擎
+         *
+         * @param application 应用程序上下文
+         */
         override fun initFlutter(application: Application) {
             if (!checkEngineInitialize()) {
                 initializeEngine(application = application)
             }
         }
 
+        /**
+         * 加载Flutter视图
+         *
+         * @param activity 活动上下文
+         * @param block 加载完成回调
+         */
         override fun loadFlutter(
             activity: FragmentActivity, block: (FlutterFragment, View) -> Unit
         ) {
             mHostActivity = activity
             mFlutterFragment = buildFlutter()
-
-
-
-
             block.invoke(mFlutterFragment, mFlutterContainer)
         }
     }
@@ -117,7 +149,6 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
         }
     }
 
-
     private fun initializeEngine(application: Application) {
         FlutterEngine(application).let { engine ->
             val entry = DartExecutor.DartEntrypoint.createDefault()
@@ -125,7 +156,6 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
             FlutterEngineCache.getInstance().put(ENGINE_ID, engine)
         }
     }
-
 
     private val mFlutterAdapter: FragmentStateAdapter by lazy {
         return@lazy object : FragmentStateAdapter(mHostActivity) {

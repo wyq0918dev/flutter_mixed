@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         findViewById<FrameLayout>(R.id.main).let { container ->
             FlutterMixedPlugin.loadFlutter(
-                activity = this@MainActivity,
+                activity = this@MainActivity
             ) { fragment, view ->
                 mFlutterFragment = fragment
                 container.addView(view)
