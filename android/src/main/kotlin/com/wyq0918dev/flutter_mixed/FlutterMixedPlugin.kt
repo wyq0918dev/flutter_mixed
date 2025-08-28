@@ -14,6 +14,7 @@ import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import io.flutter.embedding.android.FlutterFragment
 import io.flutter.embedding.android.FlutterView
+import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
 import io.flutter.embedding.engine.dart.DartExecutor
@@ -209,7 +210,7 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
 
     private fun buildFlutter(): FlutterFragment {
         if (checkEngineInitialize()) {
-            return FlutterFragment.withCachedEngine(ENGINE_ID).build()
+            return FlutterFragment.withCachedEngine(ENGINE_ID).renderMode(RenderMode.texture).build()
         } else {
             error(message = "未初始化")
         }
