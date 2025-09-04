@@ -3,8 +3,6 @@ package com.wyq0918dev.flutter_mixed
 import android.app.Application
 import android.os.Build
 import android.view.View
-import android.view.ViewGroup
-import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -13,7 +11,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 import io.flutter.embedding.android.FlutterFragment
-import io.flutter.embedding.android.FlutterView
 import io.flutter.embedding.android.RenderMode
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.FlutterEngineCache
@@ -84,19 +81,27 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
          * 初始化Flutter引擎
          *
          * @param application 应用程序上下文
+         * @param block 传入引擎对引擎执行其他操作
          */
-        fun initFlutter(application: Application)
+        fun initFlutter(
+            application: Application,
+            block: (FlutterEngine) -> Unit,
+        )
 
         /**
          * 加载Flutter视图
          *
          * @param activity 活动上下文
-         * @param block 加载完成回调
+         * @param renderMode 渲染模式
+         * @param block 加载完成回调, 分别传入FlutterFragment和View,
+         * 直接将View添加到布局中即可显示Flutter, 使用传入的FlutterFragment
+         * 完成对Flutter的信号适配, 详细参考Flutter文档.
          */
-        fun loadFlutter(
+        fun <T> loadFlutter(
             activity: FragmentActivity,
-            block: (FlutterFragment, View) -> Unit,
-        )
+            renderMode: RenderMode = RenderMode.surface,
+            block: (FlutterFragment, View) -> T?,
+        ): T?
     }
 
     /** 导出接口实现 */
@@ -107,9 +112,13 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
          *
          * @param application 应用程序上下文
          */
-        override fun initFlutter(application: Application) {
+        override fun initFlutter(
+            application: Application,
+            block: (FlutterEngine) -> Unit,
+        ) {
             if (!checkEngineInitialize()) {
-                initializeEngine(application = application)
+                val engine = initializeEngine(application = application)
+                block.invoke(engine)
             }
         }
 
@@ -119,12 +128,22 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
          * @param activity 活动上下文
          * @param block 加载完成回调
          */
-        override fun loadFlutter(
-            activity: FragmentActivity, block: (FlutterFragment, View) -> Unit
-        ) {
+        override fun <T> loadFlutter(
+            activity: FragmentActivity,
+            renderMode: RenderMode,
+            block: (FlutterFragment, View) -> T?,
+        ): T? {
             mHostActivity = activity
-            mFlutterFragment = buildFlutter()
-            block.invoke(mFlutterFragment, mFlutterContainer)
+            if (checkEngineInitialize()) {
+                FlutterFragment.withCachedEngine(ENGINE_ID).let {
+                    mFlutterFragment = it.renderMode(renderMode).build()
+                }
+            } else {
+                error(
+                    message = "FlutterMixed 未初始化",
+                )
+            }
+            return block.invoke(mFlutterFragment, mFlutterContainer)
         }
     }
 
@@ -150,11 +169,16 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
         }
     }
 
-    private fun initializeEngine(application: Application) {
-        FlutterEngine(application).let { engine ->
+    /**
+     * 初始化Flutter引擎
+     *
+     */
+    private fun initializeEngine(application: Application): FlutterEngine {
+        return FlutterEngine(application).let { engine ->
             val entry = DartExecutor.DartEntrypoint.createDefault()
             engine.dartExecutor.executeDartEntrypoint(entry)
             FlutterEngineCache.getInstance().put(ENGINE_ID, engine)
+            return@let engine
         }
     }
 
@@ -179,41 +203,6 @@ class FlutterMixedPlugin : FlutterPlugin, MethodChannel.MethodCallHandler, Activ
      */
     private fun checkEngineInitialize(): Boolean {
         return FlutterEngineCache.getInstance().get(ENGINE_ID) != null
-    }
-
-
-    private fun getPlugin(engine: FlutterEngine?): FlutterMixedPlugin? {
-        val name = "com.wyq0918dev.flutter_mixed.FlutterMixedPlugin"
-        if (engine != null) {
-            try {
-                val pluginClass: Class<out FlutterPlugin?> =
-                    Class.forName(name) as Class<out FlutterPlugin?>
-                return engine.plugins.get(pluginClass) as FlutterMixedPlugin?
-            } catch (t: Throwable) {
-                t.printStackTrace()
-            }
-        }
-        return null
-    }
-
-    private fun findFlutterView(view: View?): FlutterView? {
-        when (view) {
-            is FlutterView -> return view
-            is ViewGroup -> for (index in 0 until view.size) {
-                return findFlutterView(
-                    view = view.getChildAt(index),
-                )
-            }
-        }
-        return null
-    }
-
-    private fun buildFlutter(): FlutterFragment {
-        if (checkEngineInitialize()) {
-            return FlutterFragment.withCachedEngine(ENGINE_ID).renderMode(RenderMode.texture).build()
-        } else {
-            error(message = "未初始化")
-        }
     }
 
     /** 伴生对象 */
